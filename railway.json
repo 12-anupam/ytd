@@ -1,0 +1,11 @@
+{
+  "build": {
+    "nixpacks": {
+      "phases": {
+        "setup": {
+          "pkgs": ["python3", "ffmpeg", "gcc"]
+        }
+      }
+    }
+  }
+}
