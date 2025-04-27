@@ -34,17 +34,34 @@ def download_video(url, quality):
             {'key': 'FFmpegMetadata'}
         ],
         'logger': logger,
+        # Add these critical options to avoid 403 errors:
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+        },
+        'extractor_args': {
+            'youtube': {
+                'skip': ['dash', 'hls'],
+            },
+        },
+        'socket_timeout': 30,
+        'retries': 10,
     }
     
     with YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)
-        filepath = ydl.prepare_filename(info)
-        
-        # Ensure MP4 extension
-        if not filepath.lower().endswith('.mp4'):
-            new_path = os.path.splitext(filepath)[0] + '.mp4'
-            os.rename(filepath, new_path)
-            filepath = new_path
+        try:
+            info = ydl.extract_info(url, download=True)
+            filepath = ydl.prepare_filename(info)
+            
+            if not filepath.lower().endswith('.mp4'):
+                new_path = os.path.splitext(filepath)[0] + '.mp4'
+                os.rename(filepath, new_path)
+                filepath = new_path
+                
+            return filepath
+        except Exception as e:
+            logger.error(f"Download failed: {str(e)}")
+            raise
             
         return filepath
 
